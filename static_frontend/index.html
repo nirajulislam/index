@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Library</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #121212;
+            --card-bg: #1f1f1f;
+            --accent-color: #e50914;
+            --text-color: #f2f2f2;
+            --secondary-text: #bbb;
+            --border-color: #333;
+            --netflix-black: #000;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Inter', sans-serif;
+            padding-bottom: 50px;
+        }
+
+        .navbar {
+            background-color: var(--netflix-black) !important;
+            border-bottom: 1px solid var(--border-color);
+            padding: 15px 0;
+        }
+
+        .navbar-brand {
+            color: var(--accent-color) !important;
+            font-weight: 800;
+            font-size: 1.8rem;
+            letter-spacing: -1px;
+            text-transform: uppercase;
+        }
+
+        .search-container {
+            position: relative;
+            max-width: 400px;
+            width: 100%;
+        }
+
+        .search-input {
+            background-color: #2a2a2a !important;
+            border: 1px solid #444 !important;
+            color: #fff !important;
+            padding: 10px 15px 10px 40px !important;
+            border-radius: 8px;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--secondary-text);
+            z-index: 2;
+        }
+
+        .file-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .file-item {
+            cursor: pointer;
+            border-radius: 12px;
+            background-color: #1a1a1a;
+            transition: all 0.2s ease;
+            border: 1px solid rgba(255,255,255,0.05);
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            gap: 15px;
+        }
+
+        .file-item:hover {
+            background-color: #252525;
+            border-color: var(--accent-color);
+            transform: translateX(5px);
+        }
+
+        .file-icon-wrapper {
+            width: 45px;
+            height: 45px;
+            border-radius: 10px;
+            background-color: rgba(229, 9, 20, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .file-icon-wrapper i {
+            font-size: 1.5rem;
+            color: var(--accent-color);
+        }
+
+        .file-info {
+            flex-grow: 1;
+            min-width: 0;
+        }
+
+        .file-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin: 0;
+            color: var(--text-color);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .file-meta {
+            font-size: 0.85rem;
+            color: var(--secondary-text);
+            margin: 0;
+        }
+
+        .btn-group {
+            background-color: rgba(255, 255, 255, 0.05);
+            padding: 4px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-group .btn {
+            border: none !important;
+            border-radius: 8px !important;
+            padding: 8px 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+            color: var(--secondary-text);
+        }
+
+        .btn-group .btn.active {
+            background-color: var(--accent-color) !important;
+            color: white !important;
+        }
+
+        #notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 10px;
+            color: white;
+            font-weight: 600;
+            z-index: 9999;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            display: none;
+        }
+
+        /* Skeleton Loader */
+        .skeleton {
+            background: linear-gradient(90deg, #1a1a1a 25%, #2a2a2a 50%, #1a1a1a 75%);
+            background-size: 200% 100%;
+            animation: skeleton-loading 1.5s infinite;
+        }
+
+        @keyframes skeleton-loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        .file-item.skeleton {
+            border: none;
+            height: 77px;
+        }
+
+        .pagination .page-link {
+            background-color: var(--netflix-black);
+            border: 1px solid var(--border-color);
+            color: var(--secondary-text);
+            padding: 10px 18px;
+            font-weight: 500;
+            box-shadow: none !important;
+        }
+
+        .pagination .page-item.active .page-link {
+            background-color: var(--accent-color) !important;
+            border-color: var(--accent-color);
+            color: white !important;
+        }
+
+        .pagination .page-link:hover {
+            background-color: var(--accent-color);
+            color: white;
+            border-color: var(--accent-color);
+        }
+
+        footer {
+            background-color: var(--netflix-black);
+            color: var(--secondary-text);
+            padding: 40px 0;
+            text-align: center;
+            font-size: 0.85rem;
+            border-top: 1px solid var(--border-color);
+            margin-top: 50px;
+        }
+    </style>
+</head>
+<body>
+    <div id="notification"></div>
+    
+    <nav class="navbar navbar-dark sticky-top mb-4">
+        <div class="container d-flex justify-content-between align-items-center">
+            <a class="navbar-brand" href="index.html">INDEX</a>
+            <div class="search-container d-none d-md-block">
+                <i class="bi bi-search search-icon"></i>
+                <input id="search-input" class="form-control search-input" type="search" placeholder="Search library...">
+            </div>
+            <button onclick="window.location.href='index.html'" class="btn btn-outline-light btn-sm"><i class="bi bi-house-door-fill"></i></button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="d-md-none mb-4">
+            <div class="search-container">
+                <i class="bi bi-search search-icon"></i>
+                <input id="search-input-mobile" class="form-control search-input" type="search" placeholder="Search...">
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+            <h4 class="fw-bold mb-0">Library</h4>
+            <div id="sort-buttons" class="btn-group">
+                <button type="button" class="btn active" data-sort="newest">Newest</button>
+                <button type="button" class="btn" data-sort="oldest">Oldest</button>
+            </div>
+        </div>
+
+        <div id="file-list" class="file-list"></div>
+
+        <div class="mt-5">
+            <nav aria-label="Page navigation">
+                <ul id="pagination" class="pagination justify-content-center"></ul>
+            </nav>
+            <div class="d-flex justify-content-center align-items-center gap-2 mt-3">
+                <input type="number" id="page-input" class="form-control text-center" style="width: 80px;" placeholder="No.">
+                <button id="goto-page" class="btn btn-danger fw-bold px-4">Go</button>
+            </div>
+        </div>
+    </div>
+
+
+    <footer>
+        <div class="container text-center">
+            <p class="mb-0">INDEX</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="config.js"></script>
+    <script>
+        let currentSort = 'newest';
+        let currentSearch = '';
+        let totalPages = 1;
+
+        function debounce(func, delay) {
+            let timeout;
+            return function(...args) {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(this, args), delay);
+            };
+        }
+
+        function formatSize(bytes) {
+            if (!bytes) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        async function fetchFiles(page = 1) {
+            const list = document.getElementById('file-list');
+            list.innerHTML = '';
+            for (let i = 0; i < 10; i++) {
+                const skeleton = document.createElement('div');
+                skeleton.className = 'file-item skeleton';
+                list.appendChild(skeleton);
+            }
+            try {
+                const r = await fetchWithAuth(`${API_BASE_URL}/api/others?page=${page}&search=${currentSearch}&sort=${currentSort}`);
+                if (!r.ok) throw new Error();
+                const d = await r.json();
+                totalPages = d.total_pages;
+                displayFiles(d.files);
+                setupPagination(d.total_pages, d.current_page);
+            } catch (e) { list.innerHTML = '<div class="text-danger text-center col-12">Failed to load content.</div>'; }
+        }
+
+        function displayFiles(files) {
+            const list = document.getElementById('file-list');
+            list.innerHTML = '';
+            if (!files.length) { list.innerHTML = '<div class="col-12 text-center py-5 text-secondary">No files found.</div>'; return; }
+            
+            files.forEach(f => {
+                const item = document.createElement('div');
+                item.className = 'file-item';
+                
+                const iconWrapper = document.createElement('div');
+                iconWrapper.className = 'file-icon-wrapper';
+                
+                let iconClass = 'bi-file-earmark';
+                const format = (f.file_format || '').toLowerCase();
+                if (format.startsWith('video/')) iconClass = 'bi-play-circle-fill';
+                else if (format.startsWith('audio/')) iconClass = 'bi-music-note-beamed';
+                else if (format.includes('pdf')) iconClass = 'bi-file-earmark-pdf-fill';
+                else if (format.includes('image/')) iconClass = 'bi-file-earmark-image-fill';
+                
+                iconWrapper.innerHTML = `<i class="bi ${iconClass}"></i>`;
+                item.appendChild(iconWrapper);
+                
+                const info = document.createElement('div');
+                info.className = 'file-info';
+                
+                const title = document.createElement('p');
+                title.className = 'file-title';
+                title.textContent = f.file_name;
+                info.appendChild(title);
+                
+                const meta = document.createElement('p');
+                meta.className = 'file-meta';
+                meta.textContent = formatSize(f.file_size);
+                info.appendChild(meta);
+                
+                item.appendChild(info);
+                
+                const arrow = document.createElement('div');
+                arrow.innerHTML = '<i class="bi bi-chevron-right text-secondary"></i>';
+                item.appendChild(arrow);
+                
+                item.onclick = () => window.location.href = `details.html?file_id=${f._id}`;
+                list.appendChild(item);
+            });
+        }
+
+        function setupPagination(total, current) {
+            const p = document.getElementById('pagination'); p.innerHTML = '';
+            if (current > 1) p.innerHTML += `<li class="page-item"><a class="page-link" href="#" onclick="fetchFiles(${current-1}); return false;">Prev</a></li>`;
+            if (total > 0) p.innerHTML += `<li class="page-item active"><span class="page-link">${current} / ${total}</span></li>`;
+            if (current < total) p.innerHTML += `<li class="page-item"><a class="page-link" href="#" onclick="fetchFiles(${current+1}); return false;">Next</a></li>`;
+        }
+
+        const debouncedSearch = debounce((q) => { currentSearch = q; fetchFiles(1); }, 1000);
+        document.getElementById('search-input').addEventListener('input', e => debouncedSearch(e.target.value));
+        document.getElementById('search-input-mobile').addEventListener('input', e => debouncedSearch(e.target.value));
+
+        document.getElementById('sort-buttons').addEventListener('click', e => {
+            const b = e.target.closest('button'); if (!b) return;
+            currentSort = b.dataset.sort;
+            document.querySelectorAll('#sort-buttons .btn').forEach(btn => btn.classList.remove('active'));
+            b.classList.add('active'); fetchFiles(1);
+        });
+
+        document.getElementById('goto-page').addEventListener('click', () => {
+            const p = parseInt(document.getElementById('page-input').value);
+            if (!isNaN(p)) fetchFiles(p);
+        });
+
+        async function init() {
+            fetchFiles();
+        }
+
+        init();
+        window.addEventListener('contextmenu', e => e.preventDefault());
+    </script>
+</body>
+</html>

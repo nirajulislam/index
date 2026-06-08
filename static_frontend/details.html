@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>File Detail</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #121212;
+            --card-bg: #1f1f1f;
+            --accent-color: #e50914;
+            --text-color: #f2f2f2;
+            --secondary-text: #bbb;
+            --border-color: #333;
+            --netflix-black: #000;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .navbar {
+            background-color: var(--netflix-black) !important;
+            border-bottom: 1px solid var(--border-color);
+            padding: 15px 0;
+        }
+
+        .navbar-brand {
+            color: var(--accent-color) !important;
+            font-weight: 800;
+            font-size: 1.8rem;
+            letter-spacing: -1px;
+            text-transform: uppercase;
+        }
+
+        .main-content {
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        .player-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            overflow: hidden;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .file-icon-large {
+            width: 100%;
+            height: 250px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+            font-size: 8rem;
+            color: var(--accent-color);
+            transition: all 0.3s ease;
+        }
+
+        .player-info {
+            padding: 30px;
+            text-align: center;
+        }
+
+        .media-title {
+            font-weight: 700;
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            word-break: break-all;
+        }
+
+        .media-meta {
+            color: var(--secondary-text);
+            font-weight: 500;
+            font-size: 1rem;
+            margin-bottom: 25px;
+        }
+
+        .player-actions {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn-action-large {
+            padding: 12px 30px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            font-size: 1.1rem;
+            font-weight: 700;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            color: white;
+            gap: 10px;
+        }
+
+        .btn-play-large {
+            background-color: #FF8800;
+            box-shadow: 0 4px 15px rgba(255, 136, 0, 0.4);
+        }
+
+        .btn-download-large {
+            background-color: var(--accent-color);
+            box-shadow: 0 4px 15px rgba(229, 9, 20, 0.4);
+        }
+
+        .btn-action-large:hover {
+            transform: scale(1.05);
+            filter: brightness(1.1);
+        }
+
+        .btn-action-large:disabled {
+            opacity: 0.6;
+            transform: none;
+        }
+
+        #notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 10px;
+            color: white;
+            font-weight: 600;
+            z-index: 9999;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            display: none;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .btn-loader {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid #fff;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div id="notification"></div>
+
+    <nav class="navbar navbar-dark sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">INDEX</a>
+        </div>
+    </nav>
+
+    <div class="main-content">
+        <div id="player-root" style="width: 100%; max-width: 500px;">
+            <div class="text-center py-5">
+                <div class="spinner-border text-danger" role="status"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="config.js"></script>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const fileId = urlParams.get('file_id');
+
+        function formatSize(bytes) {
+            if (!bytes) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        async function handleAction(fileId, btn, mode) {
+            if (btn.disabled) return;
+            const originalHtml = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<div class="btn-loader"></div>';
+
+            try {
+                const response = await fetchWithAuth(`${API_BASE_URL}/api/track_play`, {
+                    method: 'POST',
+                    body: JSON.stringify({ file_id: fileId })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const streamUrl = data.stream_url;
+                    
+                    if (mode === 'download') {
+                        const a = document.createElement('a');
+                        a.href = streamUrl;
+                        a.download = '';
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        showNotification('Download started');
+                    } else {
+                        // Play mode
+                        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+                        const isAndroid = /Android/.test(navigator.userAgent);
+
+                        if (isIOS) {
+                            window.location.href = streamUrl;
+                        } else if (isAndroid) {
+                            const intentUrl = `intent:${streamUrl}#Intent;action=android.intent.action.VIEW;type=video/*;end`;
+                            window.location.href = intentUrl;
+                        } else {
+                            navigator.clipboard.writeText(streamUrl).then(() => {
+                                showNotification('Link copied to clipboard');
+                            });
+                        }
+                    }
+
+                    setTimeout(() => {
+                        btn.innerHTML = originalHtml;
+                        btn.disabled = false;
+                    }, 2000);
+                } else {
+                    showNotification('Error fetching file', true);
+                    btn.innerHTML = originalHtml;
+                    btn.disabled = false;
+                }
+            } catch (error) {
+                showNotification('An error occurred', true);
+                btn.innerHTML = originalHtml;
+                btn.disabled = false;
+            }
+        }
+
+        async function init() {
+            const root = document.getElementById('player-root');
+            try {
+                const r = await fetchWithAuth(`${API_BASE_URL}/api/file/${fileId}`);
+                if (!r.ok) throw new Error();
+                const d = await r.json();
+                
+                const format = (d.file_format || '').toLowerCase();
+                const isVideo = format.startsWith('video/');
+                const isAudio = format.startsWith('audio/');
+                
+                let iconClass = 'bi-file-earmark';
+                if (isVideo) iconClass = 'bi-play-circle-fill';
+                else if (isAudio) iconClass = 'bi-music-note-beamed';
+                else if (format.includes('pdf')) iconClass = 'bi-file-earmark-pdf-fill';
+
+                root.innerHTML = `
+                    <div class="player-card">
+                        <div class="file-icon-large">
+                            <i class="bi ${iconClass}"></i>
+                        </div>
+                        <div class="player-info">
+                            <div class="media-title">${d.file_name}</div>
+                            <div class="media-meta">${formatSize(d.file_size)} • ${d.file_format || 'Unknown Type'}</div>
+                            
+                            <div class="player-actions">
+                                ${isVideo ? `
+                                    <button class="btn-action-large btn-play-large" onclick="handleAction('${d._id}', this, 'play')">
+                                        <i class="bi bi-play-fill"></i> Play
+                                    </button>
+                                ` : ''}
+                                <button class="btn-action-large btn-download-large" onclick="handleAction('${d._id}', this, 'download')">
+                                    <i class="bi bi-download"></i> Download
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } catch (e) {
+                root.innerHTML = '<div class="text-danger text-center">Failed to load file details.</div>';
+            }
+        }
+
+        init();
+        window.addEventListener('contextmenu', e => e.preventDefault());
+    </script>
+</body>
+</html>

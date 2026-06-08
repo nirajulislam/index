@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Admin Login</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #121212;
+            --card-bg: #1f1f1f;
+            --accent-color: #e50914;
+            --text-color: #f2f2f2;
+            --secondary-text: #bbb;
+            --border-color: #333;
+            --netflix-black: #000;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .login-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 15px;
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .brand-logo {
+            color: var(--accent-color);
+            font-weight: 800;
+            font-size: 2rem;
+            text-align: center;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+        }
+
+        .form-control {
+            background-color: #2a2a2a !important;
+            border: 1px solid #444 !important;
+            color: #fff !important;
+            padding: 12px 15px;
+            border-radius: 8px;
+        }
+
+        .btn-primary {
+            background-color: var(--accent-color);
+            border: none;
+            padding: 12px;
+            font-weight: 700;
+            border-radius: 8px;
+        }
+
+        .btn-link {
+            color: var(--secondary-text);
+            text-decoration: none;
+        }
+
+        .alert {
+            border-radius: 10px;
+            font-size: 0.9rem;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <div class="brand-logo">Admin Access</div>
+        
+        <form id="request-otp-form">
+            <div class="mb-4">
+                <label class="form-label small text-secondary">Admin User ID</label>
+                <input type="text" class="form-control" id="user-id" placeholder="Enter User ID" required>
+            </div>
+            <button type="submit" id="request-btn" class="btn btn-primary w-100">Send OTP</button>
+        </form>
+
+        <form id="verify-otp-form" style="display: none;">
+            <div class="mb-4">
+                <label class="form-label small text-secondary">OTP Code</label>
+                <input type="text" class="form-control" id="otp" placeholder="6-digit code" required>
+            </div>
+            <button type="submit" id="verify-btn" class="btn btn-primary w-100">Login</button>
+            <button type="button" id="back-btn" class="btn btn-link w-100 mt-3 small">Change ID</button>
+        </form>
+
+        <div id="message" class="alert" style="display: none;"></div>
+    </div>
+
+    <script src="config.js"></script>
+    <script>
+        const requestForm = document.getElementById('request-otp-form');
+        const verifyForm = document.getElementById('verify-otp-form');
+        const userIdInput = document.getElementById('user-id');
+        const otpInput = document.getElementById('otp');
+        const messageDiv = document.getElementById('message');
+
+        function showMsg(text, isError = false) {
+            messageDiv.textContent = text;
+            messageDiv.style.display = 'block';
+            messageDiv.className = `alert alert-${isError ? 'danger' : 'info'}`;
+        }
+
+        requestForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const userId = userIdInput.value;
+            try {
+                const r = await fetch(`${API_BASE_URL}/api/request-otp`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: userId })
+                });
+                if (r.ok) {
+                    showMsg('OTP sent to your Telegram!');
+                    requestForm.style.display = 'none';
+                    verifyForm.style.display = 'block';
+                } else {
+                    const d = await r.json();
+                    showMsg(d.detail || 'Error sending OTP', true);
+                }
+            } catch (err) { showMsg('Network error', true); }
+        });
+
+        verifyForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const userId = userIdInput.value;
+            const otp = otpInput.value;
+            try {
+                const r = await fetch(`${API_BASE_URL}/api/verify-otp`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: userId, otp: otp })
+                });
+                if (r.ok) {
+                    const d = await r.json();
+                    localStorage.setItem('authToken', d.token);
+                    window.location.href = 'admin.html';
+                } else {
+                    showMsg('Invalid OTP', true);
+                }
+            } catch (err) { showMsg('Network error', true); }
+        });
+
+        document.getElementById('back-btn').addEventListener('click', () => {
+            verifyForm.style.display = 'none';
+            requestForm.style.display = 'block';
+            messageDiv.style.display = 'none';
+        });
+    </script>
+</body>
+</html>
